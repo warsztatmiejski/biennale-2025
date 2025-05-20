@@ -428,7 +428,7 @@
 
 			micSource.connect(analyser);
 			fileSource.connect(analyser);
-			analyser.connect(audioCtx.destination);
+			analyser.connect(ctx.destination);
 
 			freqData = new Uint8Array(analyser.frequencyBinCount);
 			const totalBins = analyser.frequencyBinCount;
