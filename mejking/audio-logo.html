@@ -416,18 +416,23 @@
 		}).then(stream => {
 			const ctx = new(AudioContext || webkitAudioContext)();
 			const micSource = ctx.createMediaStreamSource(stream);
-			const bgAudio = new Audio('city-noise.mp3');
+			const bgAudio = new Audio('city-noise-2.mp3');
 			bgAudio.loop = true;
 			bgAudio.autoplay = true;
 			document.body.appendChild(bgAudio);
 			const fileSource = ctx.createMediaElementSource(bgAudio);
 
+			const micGain  = audioCtx.createGain();
+			const fileGain = audioCtx.createGain();
+			micGain.gain.value  = 0.5;
+			fileGain.gain.value = 1.0;
+
 			analyser = ctx.createAnalyser();
 			analyser.fftSize = 256;
 			analyser.smoothingTimeConstant = 0.8;
 
-			micSource.connect(analyser);
-			fileSource.connect(analyser);
+			micSource.connect(micGain).connect(analyser);
+			fileSource.connect(fileGain).connect(analyser);
 			analyser.connect(ctx.destination);
 
 			freqData = new Uint8Array(analyser.frequencyBinCount);
