@@ -44,14 +44,14 @@
 			audioFloor: 0.2,
 			audioScale: 0.75,
 			audioRange: {
-				startBin: 0.1,
-				endBin: 0.5
+				startBin: 0.3,
+				endBin: 0.7
 			},
 			dampStartHeight: 20,
 			dampRangeHeight: 10,
 			emissiveMax: 0.65,
 			pointLightMax: 0.05,
-			emissiveHoldFrames: 500,
+			emissiveHoldFrames: 100,
 			emissiveDecayStep: 0.02,
 			emissiveCooldown: 500,
 			flashChance: 0.3,
@@ -437,13 +437,13 @@
 			const bandSize = (upper - lower) / letters.length;
 
 			indices = letters.map((_, i) =>
-			  Math.floor(lower + i * bandSize)
+				Math.floor(lower + i * bandSize)
 			);
 			animate();
 		}).catch(err => {
 			console.warn('No microphone — continuing with background audio only.', err);
 			animate();
-		  });
+		});
 
 		// ───── CLOCK ─────
 		const clock = document.getElementById('clock'),
