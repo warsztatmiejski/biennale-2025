@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mejking 2019 Logo</title>
+  <style>
+	body { margin:0; overflow:hidden; position:relative }
+	canvas { display:block }
+	#clock { position:absolute; top:10px; left:10px; width:120px; height:120px; pointer-events:none; }
+  </style>
+</head>
+<body>
+<canvas id="clock" width="120" height="120"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
+<script>
+  // ───── PARAMETERS ─────
+  const PARAMS = {
+	frustumSize:        5,
+	baseZoom:           1.5,
+	noonZoomBoost:      0.75,
+	sunOrbitRadius:     30,
+	sunSpeed:           0.0005,
+	sunTiltMinDeg:      30,
+	sunTiltMaxDeg:      70,
+	sunIntensityMin:    1,
+	sunIntensityMax:    1.5,
+	audioFloor:         0.2,
+	audioScale:         0.75,
+	dampStartHeight:    20,
+	dampRangeHeight:    10,
+	emissiveMax:        0.65,
+	pointLightMax:      0.05,
+	emissiveHoldFrames: 5,    // frames to hold peak
+	emissiveDecayStep:  0.02,  // linear decay per frame after hold
+	emissiveCooldown:   150,    // frames between allowed flashes
+	flashChance: 		0.3,
+	ambientMax:         0.02,
+	ambientMin:         0.005,
+	timeScale:          4,
+	cameraDistance:     3,
+	cameraHeightBase:   2,
+	maxPitchRad:        Math.PI / 2,
+	twilightWindow:     0.02   // fraction of day for dawn/dusk
+  };
+
+  // ───── SCENE & CAMERA ─────
+  const scene = new THREE.Scene(); scene.up.set(0,0,1);
+  const aspect = window.innerWidth/window.innerHeight;
+  const camF = PARAMS.frustumSize;
+  const camera = new THREE.OrthographicCamera(-camF*aspect, camF*aspect, camF, -camF, -1000, 1000);
+  camera.zoom = PARAMS.baseZoom; camera.updateProjectionMatrix();
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true; document.body.appendChild(renderer.domElement);
+
+  // ───── LIGHTS ─────
+  const ambientLight    = new THREE.AmbientLight(0xffffff, PARAMS.ambientMax);
+  const hemisphereLight = new THREE.HemisphereLight(0x0000ff,0x000000,0.3);
+  const sunLight        = new THREE.DirectionalLight(0xffffff,1);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.set(2048,2048);
+  sunLight.shadow.bias = 0.00001;
+  sunLight.shadow.normalBias = 0.05;
+  scene.add(ambientLight, hemisphereLight, sunLight);
+
+  // ───── FLOOR ─────
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40,40), new THREE.MeshPhongMaterial({color:0xFFCC00}));
+  floor.receiveShadow = true; scene.add(floor);
+
+		// ───── LETTER SHAPES ─────
+		const LETTER_SHAPES = {
+			A: () => {
+				const s = new THREE.Shape();
+				s.moveTo(0, 0);
+				s.lineTo(0, 0.5);
+				s.lineTo(0.5, 1);
+				s.lineTo(1, 0.5);
+				s.lineTo(1, 0);
+				s.closePath();
+				return s;
+			},
+			E: () => {
+				const s = new THREE.Shape(),
+					r = 0.5,
+					n = 32;
+				s.moveTo(0.5 + r, 0.5);
+				s.absarc(0.5, 0.5, r, 0, 3 * Math.PI / 2, false, n);
+				s.lineTo(0.5, 0.5);
+				s.closePath();
+				return s;
+			},
+			G: () => {
+				const s = new THREE.Shape(),
+					r = 0.5,
+					n = 32;
+				s.moveTo(0.5, 1);
+				s.absarc(0.5, 0.5, r, Math.PI / 2, 0, false, n);
+				s.lineTo(0.5, 0.5);
+				s.closePath();
+				return s;
+			},
+			I1: () => {
+				const s = new THREE.Shape();
+				s.moveTo(0, 0);
+				s.lineTo(0, 0.5);
+				s.lineTo(0.5, 1);
+				s.lineTo(0.5, 0);
+				s.closePath();
+				return s;
+			},
+			I2: () => {
+				const s = new THREE.Shape();
+				s.moveTo(0, 0);
+				s.lineTo(0, 1);
+				s.lineTo(0.5, 1);
+				s.lineTo(0.5, 0.5);
+				s.closePath();
+				return s;
+			},
+			I3: () => {
+				const s = new THREE.Shape();
+				s.moveTo(0, 0);
+				s.lineTo(0, 1);
+				s.lineTo(0.5, 0.5);
+				s.lineTo(0.5, 0);
+				s.closePath();
+				return s;
+			},
+			J: () => {
+				const s = new THREE.Shape(),
+					R = 1,
+					r = 0.5,
+					n = 32;
+				s.moveTo(1, 1);
+				s.absarc(0, 1, R, 0, -Math.PI / 2, true, n);
+				s.lineTo(0, 0.5);
+				s.absarc(0, 1, r, -Math.PI / 2, 0, false, n);
+				s.closePath();
+				return s;
+			},
+			M: () => {
+				const s = new THREE.Shape();
+				s.moveTo(0, 0);
+				s.lineTo(0, 1);
+				s.lineTo(0.5, 0.5);
+				s.lineTo(1, 1);
+				s.lineTo(1, 0);
+				s.closePath();
+				return s;
+			},
+			N: () => {
+				const s = new THREE.Shape();
+				s.moveTo(0, 0);
+				s.lineTo(0, 1);
+				s.lineTo(0.5, 0.5);
+				s.lineTo(0.5, 1);
+				s.lineTo(1, 1);
+				s.lineTo(1, 0);
+				s.lineTo(0.5, 0.5);
+				s.lineTo(0.5, 0);
+				s.closePath();
+				return s;
+			},
+			K: () => {
+				const s = new THREE.Shape();
+				s.moveTo(0, 0);
+				s.lineTo(0, 1);
+				s.lineTo(1, 1);
+				s.lineTo(0.5, 0.5);
+				s.lineTo(1, 0);
+				s.closePath();
+				return s;
+			},
+			O: () => {
+				const s = new THREE.Shape();
+				s.absarc(0.5, 0.5, 0.5, 0, 2 * Math.PI, false, 64);
+				return s;
+			},
+			R: () => {
+				const s = new THREE.Shape(),
+					r = 0.5,
+					n = 32;
+				s.moveTo(0, 0);
+				s.lineTo(0, 1);
+				s.lineTo(0.5, 1);
+				s.absarc(0.5, 0.5, r, Math.PI / 2, 0, true, n);
+				s.lineTo(0.5, 0.5);
+				s.lineTo(1, 0);
+				s.closePath();
+				return s;
+			},
+			S: () => {
+				const s = new THREE.Shape(),
+					r = 0.5,
+					n = 32;
+				s.moveTo(0, 0.5);
+				s.absarc(0.5, 0.5, r, Math.PI, Math.PI / 2, true, n);
+				s.lineTo(1, 1);
+				s.lineTo(0.5, 0.5);
+				s.lineTo(1, 0.5);
+				s.absarc(0.5, 0.5, r, 0, -Math.PI / 2, true, n);
+				s.lineTo(0, 0);
+				s.lineTo(0.5, 0.5);
+				s.closePath();
+				return s;
+			},
+			T: () => {
+				const s = new THREE.Shape();
+				s.moveTo(0, 0.5);
+				s.lineTo(0, 1);
+				s.lineTo(1, 1);
+				s.lineTo(1, 0.5);
+				s.lineTo(0.5, 0);
+				s.lineTo(0.5, 0.5);
+				s.closePath();
+				return s;
+			}
+		};
+
+		// ───────── WORD LAYOUTS ─────────
+		const miasto = [{
+				ch: 'M',
+				x: -3,
+				y: 0,
+				scale: 0.4
+			}, {
+				ch: 'I1',
+				x: -2,
+				y: 0,
+				scale: 0.74
+			},
+			{
+				ch: 'A',
+				x: -1.5,
+				y: 0,
+				scale: 0.6
+			}, {
+				ch: 'S',
+				x: -0.5,
+				y: 0,
+				scale: 0.86
+			},
+			{
+				ch: 'T',
+				x: 0.5,
+				y: 0,
+				scale: 1.0
+			}, {
+				ch: 'O',
+				x: 1.5,
+				y: 0,
+				scale: 0.6
+			}
+		];
+		const materia = [{
+				ch: 'M',
+				x: -3,
+				y: -1,
+				scale: 0.6
+			}, {
+				ch: 'A',
+				x: -2,
+				y: -1,
+				scale: 0.75
+			},
+			{
+				ch: 'T',
+				x: -1,
+				y: -1,
+				scale: 0.7
+			}, {
+				ch: 'E',
+				x: 0,
+				y: -1,
+				scale: 0.6
+			},
+			{
+				ch: 'R',
+				x: 1,
+				y: -1,
+				scale: 0.4
+			}, {
+				ch: 'I2',
+				x: 2,
+				y: -1,
+				scale: 0.7
+			},
+			{
+				ch: 'A',
+				x: 2.5,
+				y: -1,
+				scale: 0.55
+			}
+		];
+		const mejking = [{
+				ch: 'M',
+				x: -3,
+				y: -2,
+				scale: 0.4
+			}, {
+				ch: 'E',
+				x: -2,
+				y: -2,
+				scale: 0.85
+			},
+			{
+				ch: 'J',
+				x: -1,
+				y: -2,
+				scale: 0.25
+			}, {
+				ch: 'K',
+				x: 0,
+				y: -2,
+				scale: 0.7
+			},
+			{
+				ch: 'I3',
+				x: 1,
+				y: -2,
+				scale: 0.1
+			}, {
+				ch: 'N',
+				x: 1.5,
+				y: -2,
+				scale: 0.5
+			},
+			{
+				ch: 'G',
+				x: 2.5,
+				y: -2,
+				scale: 0.65
+			}
+		];
+
+		// ───── WORD LAYOUTS ─────
+		 const layouts = [...miasto, ...materia, ...mejking];
+		   layouts.forEach(o=>o.dist=Math.hypot(o.x,o.y+1));
+		   layouts.sort((a,b)=>a.dist-b.dist);
+
+		// ───── BUILD LETTERS ─────
+		  const letters = [];
+		  const extrude = {depth:5, bevelEnabled:false, curveSegments:32};
+		  layouts.forEach(({ch,x,y,scale})=>{
+			const factory=LETTER_SHAPES[ch]; if(!factory) return;
+			const geo=new THREE.ExtrudeGeometry(factory(), extrude);
+			const mat=new THREE.MeshPhongMaterial({color:0xffffff, emissive:0x000000, emissiveIntensity:0});
+			const mesh=new THREE.Mesh(geo, mat);
+			mesh.castShadow=mesh.receiveShadow=true;
+			mesh.position.set(x,y,0); mesh.scale.z=scale;
+			const pl=new THREE.PointLight(0xffffff,0,5);
+			pl.position.set(0,0, scale*extrude.depth+0.1);
+			mesh.add(pl);
+			mesh.userData = { prevVol:0, hold:0, cooldown:0, point:pl };
+			scene.add(mesh);
+			letters.push({mesh, base:scale, curr:scale});
+		  });
+
+		  // ───── AUDIO ─────
+			let analyser, freqData, indices=[];
+			navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+			  const ctx=new (AudioContext||webkitAudioContext)();
+			  const src=ctx.createMediaStreamSource(stream);
+			  analyser=ctx.createAnalyser(); analyser.fftSize=256; analyser.smoothingTimeConstant=0.8;
+			  src.connect(analyser);
+			  freqData=new Uint8Array(analyser.frequencyBinCount);
+			  const bins=freqData.length/2, step=bins/letters.length;
+			  indices=letters.map((_,i)=>Math.floor(i*step));
+			  animate();
+			}).catch(()=>alert('Mic access required'));
+
+		  // ───── CLOCK ─────
+		  const clock=document.getElementById('clock'),c2=clock.getContext('2d'),R=60;
+		  function drawClock(cf){
+			c2.clearRect(0,0,120,120);
+			const isDay=cf>=0.25&&cf<0.75;
+			c2.strokeStyle=isDay?'#000':'#fff'; c2.lineWidth=1.2;
+			c2.beginPath(); c2.arc(R,R,R-4,0,2*Math.PI); c2.stroke();
+			const h=(cf*24)%12, m=(cf*24-Math.floor(cf*24))*60;
+			const ah=h/12*2*Math.PI-Math.PI/2;
+			const am=m/60*2*Math.PI-Math.PI/2;
+			c2.beginPath();c2.moveTo(R,R);
+			c2.lineTo(R+Math.cos(ah)*(R/2-4),R+Math.sin(ah)*(R/2-4));c2.stroke();
+			c2.beginPath();c2.moveTo(R,R);
+			c2.lineTo(R+Math.cos(am)*(R-6),R+Math.sin(am)*(R-6));c2.stroke();
+		  }
+
+		  // ───── LOOP ─────
+			let angle=0;
+			function animate(){
+			  requestAnimationFrame(animate);
+			  const dt=PARAMS.timeScale;
+			  // Sun
+			  angle=(angle+PARAMS.sunSpeed*dt)%(2*Math.PI);
+			  const sx=Math.cos(angle)*PARAMS.sunOrbitRadius;
+			  const sz=Math.sin(angle)*PARAMS.sunOrbitRadius;
+			  const tilt=THREE.MathUtils.degToRad(THREE.MathUtils.lerp(PARAMS.sunTiltMinDeg, PARAMS.sunTiltMaxDeg, sz/PARAMS.sunOrbitRadius));
+			  sunLight.position.set(sx, -sz*Math.sin(tilt), sz*Math.cos(tilt));
+			  const sunFrac=THREE.MathUtils.clamp(sz/PARAMS.sunOrbitRadius,0,1);
+			  sunLight.intensity = sz>0? THREE.MathUtils.lerp(PARAMS.sunIntensityMin, PARAMS.sunIntensityMax, sunFrac) : 0;
+			  sunLight.color.setHSL(0.08+0.07*sunFrac,1,0.5+0.3*sunFrac);
+
+			  // Phase
+			  const cf=(angle/(2*Math.PI)+0.25)%1;
+			  const dawnStart=0.25-PARAMS.twilightWindow, dawnEnd=0.25+PARAMS.twilightWindow;
+			  const duskStart=0.75-PARAMS.twilightWindow, duskEnd=0.75+PARAMS.twilightWindow;
+			  let phase;
+			  if(cf>=dawnEnd && cf<duskStart) phase='day';
+			  else if((cf>=duskStart && cf<duskEnd) || (cf<dawnEnd && cf>=dawnStart)) phase='twilight';
+			  else phase='night';
+
+			  // Ambient/Hemi
+			  if(phase==='day'){
+				ambientLight.intensity=PARAMS.ambientMax;
+				hemisphereLight.color.setHSL(0.6,0.5+0.5*sunFrac,0.2+0.4*sunFrac);
+				hemisphereLight.groundColor.setHSL(0.1,0.5,0.1+0.2*sunFrac);
+			  } else if(phase==='twilight'){
+				let f = cf<dawnEnd ? (cf-dawnStart)/(dawnEnd-dawnStart) : (duskEnd-cf)/(duskEnd-duskStart);
+				f=THREE.MathUtils.clamp(f,0,1);
+				ambientLight.intensity     = THREE.MathUtils.lerp(PARAMS.ambientMin, PARAMS.ambientMax, f);
+				const hemiLum = THREE.MathUtils.lerp(0.02,0.6,f);
+				hemisphereLight.color.setHSL(0.6,0.5,hemiLum);
+				hemisphereLight.groundColor.setHSL(0.1,0.5,0.02+0.08*f);
+			  } else {
+				ambientLight.intensity=PARAMS.ambientMin;
+				hemisphereLight.color.setHSL(0.6,0.5,0.02);
+				hemisphereLight.groundColor.setHSL(0.1,0.5,0.01);
+			  }
+
+			  // Audio
+			  if(analyser) analyser.getByteFrequencyData(freqData);
+
+			  // Update letters
+			  letters.forEach((o,i)=>{
+				const {mesh, base} = o;
+				let vol = analyser? freqData[indices[i]]/255 : 0;
+				if(sz>PARAMS.dampStartHeight) vol *= Math.max(0,1-(sz-PARAMS.dampStartHeight)/PARAMS.dampRangeHeight);
+				// scale
+				const targetScale = base*(vol*PARAMS.audioScale+PARAMS.audioFloor);
+				o.curr = targetScale>=o.curr? targetScale : o.curr + (targetScale-o.curr)*0.035;
+				mesh.scale.z = o.curr;
+
+				// cooldown
+				if(mesh.userData.cooldown>0) mesh.userData.cooldown--;
+
+				// emissive & point-light
+				const mat=mesh.material;
+				const pl = mesh.userData.point;
+				if(phase!=='day'){
+				  // on rise & cooldown
+				  if (vol > 0.01 &&
+					  mesh.userData.cooldown === 0 &&
+					  Math.random() < PARAMS.flashChance){
+					mesh.userData.prevVol = 1.0;
+					mesh.userData.hold    = PARAMS.emissiveHoldFrames;
+					mesh.userData.cooldown=PARAMS.emissiveCooldown;
+				  } else if(mesh.userData.hold>0){
+					mesh.userData.hold--;
+					mesh.userData.prevVol = 1.0;
+				  } else {
+					mesh.userData.prevVol = Math.max(0, mesh.userData.prevVol - PARAMS.emissiveDecayStep);
+				  }
+				  // apply
+				  mat.emissive.setHex(0xffffff);
+				  mat.emissiveIntensity = mesh.userData.prevVol * PARAMS.emissiveMax;
+				  pl.intensity          = mesh.userData.prevVol * PARAMS.pointLightMax;
+				  // during twilight fade to zero
+				  if(phase==='twilight'){
+					let fade = cf<dawnEnd ? (dawnEnd-cf)/(dawnEnd-dawnStart) : (cf-duskStart)/(duskEnd-duskStart);
+					fade = THREE.MathUtils.clamp(fade,0,1);
+					mat.emissiveIntensity *= fade;
+					pl.intensity *= fade;
+				  }
+				} else {
+				  mat.emissiveIntensity=0; pl.intensity=0;
+				  mesh.userData.prevVol=0;
+				  mesh.userData.hold=0;
+				  mesh.userData.cooldown       = 0;
+				}
+			  });
+
+			  // camera
+			  const camZoom = PARAMS.baseZoom * THREE.MathUtils.lerp(1, PARAMS.noonZoomBoost, sunFrac);
+			  camera.zoom=camZoom; camera.updateProjectionMatrix();
+			  const pitch= Math.max(0, sz/PARAMS.sunOrbitRadius)*PARAMS.maxPitchRad;
+			  camera.position.set(
+				PARAMS.cameraDistance*Math.cos(angle)*Math.cos(pitch),
+				PARAMS.cameraDistance*Math.sin(angle)*Math.cos(pitch),
+				PARAMS.cameraHeightBase+PARAMS.cameraDistance*Math.sin(pitch)
+			  );
+			  camera.lookAt(0,0,0);
+			  drawClock(cf);
+			  renderer.render(scene,camera);
+			}
+			animate();
+
+			window.addEventListener('resize',()=>{
+			  const ar=window.innerWidth/window.innerHeight;
+			  camera.left=-PARAMS.frustumSize*ar;
+			  camera.right=PARAMS.frustumSize*ar;
+			  camera.top=PARAMS.frustumSize;
+			  camera.bottom=-PARAMS.frustumSize;
+			  camera.updateProjectionMatrix();
+			  renderer.setSize(window.innerWidth,window.innerHeight);
+			});
+		  </script>
+		  </body>
+		  </html>
