@@ -425,8 +425,8 @@
 			document.body.appendChild(bgAudio);
 			const fileSource = ctx.createMediaElementSource(bgAudio);
 
-			const micGain  = audioCtx.createGain();
-			const fileGain = audioCtx.createGain();
+			const micGain  = ctx.createGain();
+			const fileGain = ctx.createGain();
 			micGain.gain.value  = PARAMS.baseMicGain;
 			fileGain.gain.value = PARAMS.baseFileGain;
 
