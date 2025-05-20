@@ -47,6 +47,8 @@
 				startBin: 0.3,
 				endBin: 0.7
 			},
+			baseMicGain: 0.5,
+			baseFileGain: 1.0,
 			dampStartHeight: 20,
 			dampRangeHeight: 10,
 			emissiveMax: 0.65,
@@ -410,11 +412,12 @@
 		});
 
 		// ───── AUDIO ─────
-		let analyser, freqData, indices = [];
-		navigator.mediaDevices.getUserMedia({
-			audio: true
-		}).then(stream => {
+		let micAnalyser, fileAnalyser;
+		let micData, fileData, indices = [];
+		navigator.mediaDevices.getUserMedia({ audio: true})
+			.then(stream => {
 			const ctx = new(AudioContext || webkitAudioContext)();
+
 			const micSource = ctx.createMediaStreamSource(stream);
 			const bgAudio = new Audio('city-noise-2.mp3');
 			bgAudio.loop = true;
@@ -424,19 +427,28 @@
 
 			const micGain  = audioCtx.createGain();
 			const fileGain = audioCtx.createGain();
-			micGain.gain.value  = 0.5;
-			fileGain.gain.value = 1.0;
+			micGain.gain.value  = PARAMS.baseMicGain;
+			fileGain.gain.value = PARAMS.baseFileGain;
 
-			analyser = ctx.createAnalyser();
-			analyser.fftSize = 256;
-			analyser.smoothingTimeConstant = 0.8;
+			const micAnalyser  = ctx.createAnalyser();
+			const fileAnalyser = ctx.createAnalyser();
+			[micAnalyser, fileAnalyser].forEach(an => {
+			  an.fftSize = 256;
+			  an.smoothingTimeConstant = 0.8;
+			});
 
-			micSource.connect(micGain).connect(analyser);
-			fileSource.connect(fileGain).connect(analyser);
-			analyser.connect(ctx.destination);
+			micSource
+				.connect(micGain)
+				.connect(micAnalyser);
+			fileSource
+				.connect(fileGain)
+				.connect(fileAnalyser)
+				.connect(ctx.destination);
 
-			freqData = new Uint8Array(analyser.frequencyBinCount);
-			const totalBins = analyser.frequencyBinCount;
+			const micData  = new Uint8Array(micAnalyser.frequencyBinCount);
+			const fileData = new Uint8Array(fileAnalyser.frequencyBinCount);
+
+			const totalBins = fileAnalyser.frequencyBinCount;
 			const lower = Math.floor(totalBins * PARAMS.audioRange.startBin);
 			const upper = Math.floor(totalBins * PARAMS.audioRange.endBin);
 			const bandSize = (upper - lower) / letters.length;
@@ -523,7 +535,14 @@
 			}
 
 			// Audio
-			if (analyser) analyser.getByteFrequencyData(freqData);
+			if (micAnalyser) micAnalyser.getByteFrequencyData(micData);
+			fileAnalyser.getByteFrequencyData(fileData);
+
+			const combinedData = new Uint8Array(fileData.length);
+			  for (let i = 0; i < combinedData.length; i++) {
+				const m = micAnalyser ? micData[i] : 0;
+				combinedData[i] = (m + fileData[i]) >> 1;
+			  }
 
 			// Update letters
 			letters.forEach((o, i) => {
@@ -531,8 +550,15 @@
 					mesh,
 					base
 				} = o;
-				let vol = analyser ? freqData[indices[i]] / 255 : 0;
-				if (sz > PARAMS.dampStartHeight) vol *= Math.max(0, 1 - (sz - PARAMS.dampStartHeight) / PARAMS.dampRangeHeight);
+				let vol = combinedData[indices[i]] / 255;
+				if (sz > PARAMS.dampStartHeight) {
+					dampRatio = Math.max(0, 1 - (sz - PARAMS.dampStartHeight) / PARAMS.dampRangeHeight);
+					fileGain.gain.value = PARAMS.baseFileGain * dampRatio;
+				} else {
+					fileGain.gain.value = PARAMS.baseFileGain;
+				}
+				vol *= dampRatio;
+
 				// scale
 				const targetScale = base * (vol * PARAMS.audioScale + PARAMS.audioFloor);
 				o.curr = targetScale >= o.curr ? targetScale : o.curr + (targetScale - o.curr) * 0.035;
@@ -592,6 +618,7 @@
 			drawClock(cf);
 			renderer.render(scene, camera);
 		}
+
 		animate();
 
 		window.addEventListener('resize', () => {
