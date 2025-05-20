@@ -440,7 +440,10 @@
 			  Math.floor(lower + i * bandSize)
 			);
 			animate();
-		}).catch(() => alert('Mic access required'));
+		}).catch(err => {
+			console.warn('No microphone — continuing with background audio only.', err);
+			animate();
+		  });
 
 		// ───── CLOCK ─────
 		const clock = document.getElementById('clock'),
