@@ -171,10 +171,31 @@
 			background: black;
 			padding: 1rem;
 			display: flex;
-			justify-content: center;
-			gap: 2rem;
+			justify-content: space-between;
+			align-items: center;
 			z-index: 5;
 			mix-blend-mode: normal;
+		}
+
+		.controls-bar .toggle-buttons {
+			display: flex;
+			gap: 2rem;
+		}
+
+		.controls-bar p {
+			margin: 0;
+		}
+
+		.controls-bar a {
+			color: white;
+			text-decoration: none;
+			font-family: "noka", sans-serif;
+			font-weight: 400;
+			font-size: 0.9rem;
+		}
+
+		.controls-bar a:hover {
+			text-decoration: underline;
 		}
 
 		.toggle-button {
@@ -251,8 +272,11 @@
 	</div>
 
 	<div class="controls-bar">
-		<button class="toggle-button active" id="langToggle">EN</button>
-		<button class="toggle-button active" id="motionToggle">MOTION</button>
+		<div class="toggle-buttons">
+			<button class="toggle-button active" id="langToggle">EN</button>
+			<button class="toggle-button active" id="motionToggle">MOTION</button>
+		</div>
+		<p><a href="https://lenart.pl" target="_blank">Aleksander Lenart 2025</a></p>
 	</div>
 
 	<div class="debug-console" id="debugConsole">
@@ -269,8 +293,8 @@
 				this.logs = [];
 				this.maxLogs = 8;
 
-				// Show debug on mobile or when needed
-				if (this.isMobile()) {
+				// Show debug on mobile or when needed - SET TO false TO DISABLE
+				if (false && this.isMobile()) { // Changed: set first condition to false
 					this.console.style.display = 'block';
 				}
 			}
@@ -308,14 +332,15 @@
 				cancel: "Cancel",
 				motion: "MOTION",
 				paragraphs: [
+					"What does an interaction mean in the world of digital screens?",
+					"Every day we are consuming terabytes of data scrolling through content on our devices. The latest and greatest is being beamed to our eyes through an array of tiny pixels. Each such dot consists of a red, green and blue sub-pixel.",
+					"What would happen if we enlarged those RGB LED lights and brought them into a physical space..?",
+					"About coloured lights and shadows:",
 					"Light mixing is a fundamental principle in physics and visual arts, where different colored lights combine to create new hues through additive color synthesis. Unlike pigment mixing, which is subtractive, light mixing follows the RGB (Red, Green, Blue) color model where colors become brighter as they overlap.",
-					"When pure red, green, and blue lights intersect, they create secondary colors: red and green produce yellow, blue and green create cyan, and red and blue form magenta. Where all three primary lights converge, white light emerges—the complete visible spectrum unified.",
+					"When pure red, green, and blue lights intersect, they create secondary colors: red and green produce yellow, blue and green create cyan, and red and blue form magenta. Where all three primary lights converge, white light emerges — the complete visible spectrum unified.",
 					"This phenomenon occurs naturally in various contexts: stage lighting design, computer displays, LED arrays, and even in the aurora borealis where charged particles excite atmospheric gases to emit different colored lights that dance and blend across the night sky.",
-					"The gyroscopic movement you're experiencing mirrors how light itself moves and shifts in space. Motion sensors in your device detect orientation changes and translate them into subtle positional shifts of the light circles, creating an immersive, responsive environment that reacts to your physical interaction with the device.",
-					"Thomas Young's double-slit experiment first demonstrated light's wave nature, while James Clerk Maxwell later proved that light consists of electromagnetic waves. These discoveries laid the groundwork for understanding how different wavelengths combine to create the rich spectrum of colors we perceive.",
-					"In digital displays, millions of tiny RGB sub-pixels work together to create every image you see. Each pixel contains red, green, and blue elements that can be individually controlled to produce any color within the display's gamut—a testament to the power of additive light mixing.",
-					"The soft edges and falloff you observe in these circles simulate how light naturally behaves in the physical world. Light intensity decreases with distance from the source, creating gradual transitions rather than sharp boundaries. This natural falloff is what makes light mixing so visually appealing and realistic.",
-					"Continue scrolling to explore how these fundamental principles of light and color create an endless dance of hues, where science meets art in a symphony of electromagnetic radiation that our eyes interpret as the beautiful phenomenon we call color."
+					"When an object blocks one of the RGB lights, fascinating colored shadows appear. If red light is blocked, the shadow appears cyan (blue + green). If green light is blocked, the shadow becomes magenta (red + blue). If blue light is blocked, the shadow turns yellow (red + green).",
+					"Amazing, isn't it? Now stop scrolling and play outside!"
 				]
 			},
 			pl: {
@@ -324,14 +349,15 @@
 				cancel: "Anuluj",
 				motion: "RUCH",
 				paragraphs: [
-					"Mieszanie światła jest fundamentalną zasadą fizyki i sztuk wizualnych, gdzie różnokolorowe światła łączą się, tworząc nowe odcienie poprzez addytywną syntezę kolorów. W przeciwieństwie do mieszania pigmentów, które jest subtraktywne, mieszanie światła opiera się na modelu RGB (czerwony, zielony, niebieski), gdzie kolory stają się jaśniejsze podczas nakładania.",
-					"Gdy czyste czerwone, zielone i niebieskie światła przecinają się, tworzą kolory wtórne: czerwony i zielony dają żółty, niebieski i zielony tworzą cyjan, a czerwony i niebieski formują magentę. Tam, gdzie wszystkie trzy podstawowe światła zbiegają się, powstaje białe światło—kompletne widmo widzialne zjednoczone.",
+					"Co oznacza interakcja w świecie ekranów?",
+					"Każdego dnia konsumujemy terabajty danych przewijając treści na naszych urządzeniach. Najnowsze informaje są przesyłane do naszych oczu przez macierz maleńkich pikseli. Każda taka kropka składa się z czerwonego, zielonego i niebieskiego subpiksela.",
+					"Co by się stało, gdybyśmy powiększyli te diody RGB i przenieśli je do przestrzeni fizycznej?",
+					"O kolorowych światłach i cieniach:",
+					"Mieszanie światła jest fundamentalną zasadą fizyki i sztuk wizualnych, gdzie różnokolorowe światła łączą się, tworząc nowe odcienie poprzez addytywną syntezę kolorów. W przeciwieństwie do mieszania pigmentów, które jest subtraktywne, mieszanie światła opiera się na modelu RGB (czerwony, zielony, niebieski), gdzie barwy stają się jaśniejsze podczas nakładania.",
+					"Gdy czyste czerwone, zielone i niebieskie światła przecinają się, tworzą kolory wtórne: czerwony i zielony dają żółty, niebieski i zielony tworzą cyjan, a czerwony i niebieski dają magentę. Tam, gdzie wszystkie trzy podstawowe światła zbiegają się, powstaje białe światło — połączone kompletne widmo widzialne.",
 					"To zjawisko występuje naturalnie w różnych kontekstach: projektowanie oświetlenia scenicznego, wyświetlacze komputerowe, macierze LED, a nawet w zorzy polarnej, gdzie naładowane cząsteczki pobudzają gazy atmosferyczne do emitowania różnokolorowych świateł, które tańczą i mieszają się na nocnym niebie.",
-					"Żyroskopowy ruch, którego doświadczasz, odzwierciedla sposób, w jaki samo światło porusza się i zmienia w przestrzeni. Czujniki ruchu w Twoim urządzeniu wykrywają zmiany orientacji i przekładają je na subtelne przesunięcia pozycyjne kręgów światła, tworząc immersyjne, responsywne środowisko reagujące na Twoją fizyczną interakcję z urządzeniem.",
-					"Eksperyment podwójnej szczeliny Thomasa Younga po raz pierwszy wykazał falową naturę światła, podczas gdy James Clerk Maxwell później udowodnił, że światło składa się z fal elektromagnetycznych. Te odkrycia położyły podwaliny pod zrozumienie tego, jak różne długości fal łączą się, tworząc bogate spektrum kolorów, które postrzegamy.",
-					"W wyświetlaczach cyfrowych miliony maleńkich subpikseli RGB współpracują, aby stworzyć każdy obraz, który widzisz. Każdy piksel zawiera czerwone, zielone i niebieskie elementy, które mogą być indywidualnie kontrolowane, aby wytworzyć każdy kolor w gamie wyświetlacza—świadectwo mocy addytywnego mieszania światła.",
-					"Miękkie krawędzie i opadanie, które obserwujesz w tych kręgach, symuluje sposób, w jaki światło naturalnie zachowuje się w świecie fizycznym. Intensywność światła maleje wraz z odległością od źródła, tworząc stopniowe przejścia zamiast ostrych granic. To naturalne opadanie sprawia, że mieszanie światła jest tak wizualnie atrakcyjne i realistyczne.",
-					"Kontynuuj przewijanie, aby zbadać, jak te fundamentalne zasady światła i koloru tworzą niekończący się taniec odcieni, gdzie nauka spotyka się ze sztuką w symfonii promieniowania elektromagnetycznego, które nasze oczy interpretują jako piękne zjawisko, które nazywamy kolorem."
+					"Gdy obiekt blokuje jedno ze świateł RGB, pojawiają się kolorowe cienie. Jeśli zablokowane jest czerwone światło, cień wydaje się cyjan (niebieski + zielony). Jeśli zablokowane jest zielone światło, cień staje się magenta (czerwony + niebieski). Jeśli zablokowane jest niebieskie światło, cień zmienia się w żółty (czerwony + zielony).",
+					"Niesamowite, prawda? Teraz przestań scrollować i pobaw się na zewnątrz!"
 				]
 			}
 		};
@@ -675,7 +701,7 @@
 					const normalizedX = (gamma + 90) / 180;
 					const normalizedY = (beta + 180) / 360;
 
-					this.updateCirclePositions(normalizedX, normalizedY);
+					this.updateCirclePositions(normalizedX, normalizedY, true); // true = isGyro
 				};
 
 				// Add event listener
@@ -693,10 +719,11 @@
 				}, 3000);
 			}
 
-			updateCirclePositions(inputX, inputY) {
+			updateCirclePositions(inputX, inputY, isGyro = false) {
 				if (this.motionReduced || !this.basePositions) return;
 
-				const offsetScale = 500;
+				// Different scales for gyro vs mouse
+				const offsetScale = isGyro ? 1000 : 500; // Bigger shifts for gyro
 
 				Object.keys(this.circles).forEach(color => {
 					const circle = this.circles[color];
