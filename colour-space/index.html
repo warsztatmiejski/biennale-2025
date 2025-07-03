@@ -3,10 +3,8 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>PRZESTRZEŃ BARW</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+	<title>RGB Light Circles</title>
+	<link rel="stylesheet" href="https://use.typekit.net/gti1nvp.css">
 	<style>
 		* {
 			margin: 0;
@@ -15,9 +13,9 @@
 		}
 
 		body {
-			font-family: 'Noto Sans', Arial, sans-serif;
+			font-family: "noka", sans-serif;
 			overflow-x: hidden;
-			background: white;
+			background: black;
 			height: 100vh;
 		}
 
@@ -28,40 +26,73 @@
 			width: 100vw;
 			height: 100vh;
 			z-index: 1;
-			background: white;
 		}
 
-		#lightCanvas {
+		.circles-layer {
+			position: absolute;
 			width: 100%;
 			height: 100%;
-			display: block;
+			top: 0;
+			left: 0;
+		}
+
+		.circle {
+			position: absolute;
+			width: 100vmin;
+			height: 100vmin;
+			border-radius: 50%;
+			mix-blend-mode: screen;
+			transition: transform 0.1s ease-out;
+		}
+
+		.circle-red {
+			background: radial-gradient(circle, rgba(255,0,0,1.0) 0%, rgba(255,0,0,1.0) 80%, rgba(5,0,0,1.0) 100%);
+			top: -30%;
+			left: -20%;
+		}
+
+		.circle-green {
+			background: radial-gradient(circle, rgba(0,255,0,1.8) 0%, rgba(0,255,0,1.0) 80%, rgba(0,5,0,1.0) 100%);
+			top: -10%;
+			right: -20%;
+		}
+
+		.circle-blue {
+			background: radial-gradient(circle, rgba(0,0,255,1.0) 0%, rgba(0,0,255,1.0) 80%, rgba(0,0,5,1.0) 100%);
+			bottom: -20%;
+			left: 40%;
+			transform: translateX(-50%);
 		}
 
 		.content {
 			position: relative;
 			z-index: 2;
 			min-height: 100vh;
-			padding: 2rem;
+			padding: 6rem;
 			color: white;
 			mix-blend-mode: difference;
 			overflow-y: auto;
 		}
 
 		.heading {
+			font-family: "noka", sans-serif;
+			font-weight: 900;
+			font-style: normal;
 			font-size: clamp(2.5rem, 8vw, 6rem);
-			font-weight: 700;
 			margin-bottom: 2rem;
 			line-height: 1.1;
-			text-align: center;
+			text-align: left;
 		}
 
 		.text-content {
+			font-family: "noka", sans-serif;
+			font-weight: 600;
+			font-style: normal;
 			font-size: clamp(1rem, 3vw, 1.5rem);
-			font-weight: 300;
 			line-height: 1.6;
 			max-width: 800px;
 			margin: 0 auto;
-			text-align: justify;
+			text-align: left;
 		}
 
 		.paragraph {
@@ -78,258 +109,434 @@
 			}
 		}
 
-		.gyro-status {
+		.gyro-modal {
 			position: fixed;
-			bottom: 1rem;
-			right: 1rem;
-			background: rgba(0,0,0,0.7);
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(0,0,0,0.9);
+			padding: 2rem;
+			border-radius: 15px;
+			z-index: 10;
+			text-align: center;
+			border: 1px solid rgba(255,255,255,0.2);
+		}
+
+		.gyro-button {
+			background: rgba(255,255,255,0.2);
 			color: white;
+			border: none;
+			padding: 1rem 2rem;
+			border-radius: 10px;
+			font-size: 1.2rem;
+			cursor: pointer;
+			font-family: "noka", sans-serif;
+			font-weight: 600;
+			margin-bottom: 1rem;
+			display: block;
+			width: 100%;
+		}
+
+		.gyro-cancel {
+			background: rgba(100,100,100,0.5);
+			color: white;
+			border: none;
+			padding: 0.5rem 1rem;
+			border-radius: 8px;
+			font-size: 0.9rem;
+			cursor: pointer;
+			font-family: "noka", sans-serif;
+			font-weight: 400;
+			display: block;
+			width: 100%;
+		}
+
+		.controls-bar {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: rgba(0,0,0,0.8);
+			padding: 1rem;
+			display: flex;
+			justify-content: center;
+			gap: 2rem;
+			z-index: 5;
+			mix-blend-mode: normal;
+		}
+
+		.toggle-button {
+			background: rgba(255,255,255,0.2);
+			color: white;
+			border: none;
 			padding: 0.5rem 1rem;
 			border-radius: 20px;
-			font-size: 0.8rem;
-			z-index: 3;
+			cursor: pointer;
+			font-family: "noka", sans-serif;
+			font-weight: 600;
+			font-size: 0.9rem;
+			transition: background 0.2s ease;
+			min-width: 80px;
+		}
+
+		.toggle-button.active {
+			background: rgba(255,255,255,0.5);
+		}
+
+		.toggle-button:hover {
+			background: rgba(255,255,255,0.3);
+		}
+
+		.reduced-motion .circle {
+			transition: none !important;
+			transform: none !important;
+		}
+
+		.reduced-motion .circles-layer {
+			opacity: 0.5;
+		}
+
+		.reduced-motion .content {
+			color: white;
 			mix-blend-mode: normal;
 		}
 	</style>
 </head>
 <body>
 	<div class="canvas-container">
-		<canvas id="lightCanvas"></canvas>
-	</div>
-
-	<div class="content">
-		<h1 class="heading">RGB Light Mixing</h1>
-
-		<div class="text-content">
-			<p class="paragraph">
-				Light mixing is a fundamental principle in physics and visual arts, where different colored lights combine to create new hues through additive color synthesis. Unlike pigment mixing, which is subtractive, light mixing follows the RGB (Red, Green, Blue) color model where colors become brighter as they overlap.
-			</p>
-
-			<p class="paragraph">
-				When pure red, green, and blue lights intersect, they create secondary colors: red and green produce yellow, blue and green create cyan, and red and blue form magenta. Where all three primary lights converge, white light emerges—the complete visible spectrum unified.
-			</p>
-
-			<p class="paragraph">
-				This phenomenon occurs naturally in various contexts: stage lighting design, computer displays, LED arrays, and even in the aurora borealis where charged particles excite atmospheric gases to emit different colored lights that dance and blend across the night sky.
-			</p>
-
-			<p class="paragraph">
-				The gyroscopic movement you're experiencing mirrors how light itself moves and shifts in space. Motion sensors in your device detect orientation changes and translate them into subtle positional shifts of the light circles, creating an immersive, responsive environment that reacts to your physical interaction with the device.
-			</p>
-
-			<p class="paragraph">
-				Thomas Young's double-slit experiment first demonstrated light's wave nature, while James Clerk Maxwell later proved that light consists of electromagnetic waves. These discoveries laid the groundwork for understanding how different wavelengths combine to create the rich spectrum of colors we perceive.
-			</p>
-
-			<p class="paragraph">
-				In digital displays, millions of tiny RGB sub-pixels work together to create every image you see. Each pixel contains red, green, and blue elements that can be individually controlled to produce any color within the display's gamut—a testament to the power of additive light mixing.
-			</p>
-
-			<p class="paragraph">
-				The soft edges and falloff you observe in these circles simulate how light naturally behaves in the physical world. Light intensity decreases with distance from the source, creating gradual transitions rather than sharp boundaries. This natural falloff is what makes light mixing so visually appealing and realistic.
-			</p>
-
-			<p class="paragraph">
-				Continue scrolling to explore how these fundamental principles of light and color create an endless dance of hues, where science meets art in a symphony of electromagnetic radiation that our eyes interpret as the beautiful phenomenon we call color.
-			</p>
+		<div class="circles-layer">
+			<div class="circle circle-red" id="redCircle"></div>
+			<div class="circle circle-green" id="greenCircle"></div>
+			<div class="circle circle-blue" id="blueCircle"></div>
 		</div>
 	</div>
 
-	<div class="gyro-status" id="gyroStatus">Gyroscope: Initializing...</div>
+	<div class="content">
+		<h1 class="heading" id="mainHeading">RGB Light Mixing</h1>
+
+		<div class="text-content" id="textContent">
+		</div>
+	</div>
+
+	<div class="gyro-modal" id="gyroModal">
+		<button class="gyro-button" id="gyroButton">Enable Gyroscope</button>
+		<button class="gyro-cancel" id="gyroCancel">Cancel</button>
+	</div>
+
+	<div class="controls-bar">
+		<button class="toggle-button active" id="langToggle">EN</button>
+		<button class="toggle-button active" id="motionToggle">MOTION</button>
+	</div>
 
 	<script>
+		// Language content
+		const content = {
+			en: {
+				heading: "COLOUR SPACE",
+				button: "Enable Gyroscope",
+				cancel: "Cancel",
+				paragraphs: [
+					"Light mixing is a fundamental principle in physics and visual arts, where different colored lights combine to create new hues through additive color synthesis. Unlike pigment mixing, which is subtractive, light mixing follows the RGB (Red, Green, Blue) color model where colors become brighter as they overlap.",
+					"When pure red, green, and blue lights intersect, they create secondary colors: red and green produce yellow, blue and green create cyan, and red and blue form magenta. Where all three primary lights converge, white light emerges—the complete visible spectrum unified.",
+					"This phenomenon occurs naturally in various contexts: stage lighting design, computer displays, LED arrays, and even in the aurora borealis where charged particles excite atmospheric gases to emit different colored lights that dance and blend across the night sky.",
+					"The gyroscopic movement you're experiencing mirrors how light itself moves and shifts in space. Motion sensors in your device detect orientation changes and translate them into subtle positional shifts of the light circles, creating an immersive, responsive environment that reacts to your physical interaction with the device.",
+					"Thomas Young's double-slit experiment first demonstrated light's wave nature, while James Clerk Maxwell later proved that light consists of electromagnetic waves. These discoveries laid the groundwork for understanding how different wavelengths combine to create the rich spectrum of colors we perceive.",
+					"In digital displays, millions of tiny RGB sub-pixels work together to create every image you see. Each pixel contains red, green, and blue elements that can be individually controlled to produce any color within the display's gamut—a testament to the power of additive light mixing.",
+					"The soft edges and falloff you observe in these circles simulate how light naturally behaves in the physical world. Light intensity decreases with distance from the source, creating gradual transitions rather than sharp boundaries. This natural falloff is what makes light mixing so visually appealing and realistic.",
+					"Continue scrolling to explore how these fundamental principles of light and color create an endless dance of hues, where science meets art in a symphony of electromagnetic radiation that our eyes interpret as the beautiful phenomenon we call color."
+				]
+			},
+			pl: {
+				heading: "PRZESTRZEŃ BARW",
+				button: "Włącz żyroskop",
+				cancel: "Anuluj",
+				paragraphs: [
+					"Mieszanie światła jest fundamentalną zasadą fizyki i sztuk wizualnych, gdzie różnokolorowe światła łączą się, tworząc nowe odcienie poprzez addytywną syntezę kolorów. W przeciwieństwie do mieszania pigmentów, które jest subtraktywne, mieszanie światła opiera się na modelu RGB (czerwony, zielony, niebieski), gdzie kolory stają się jaśniejsze podczas nakładania.",
+					"Gdy czyste czerwone, zielone i niebieskie światła przecinają się, tworzą kolory wtórne: czerwony i zielony dają żółty, niebieski i zielony tworzą cyjan, a czerwony i niebieski formują magentę. Tam, gdzie wszystkie trzy podstawowe światła zbiegają się, powstaje białe światło—kompletne widmo widzialne zjednoczone.",
+					"To zjawisko występuje naturalnie w różnych kontekstach: projektowanie oświetlenia scenicznego, wyświetlacze komputerowe, macierze LED, a nawet w zorzy polarnej, gdzie naładowane cząsteczki pobudzają gazy atmosferyczne do emitowania różnokolorowych świateł, które tańczą i mieszają się na nocnym niebie.",
+					"Żyroskopowy ruch, którego doświadczasz, odzwierciedla sposób, w jaki samo światło porusza się i zmienia w przestrzeni. Czujniki ruchu w Twoim urządzeniu wykrywają zmiany orientacji i przekładają je na subtelne przesunięcia pozycyjne kręgów światła, tworząc immersyjne, responsywne środowisko reagujące na Twoją fizyczną interakcję z urządzeniem.",
+					"Eksperyment podwójnej szczeliny Thomasa Younga po raz pierwszy wykazał falową naturę światła, podczas gdy James Clerk Maxwell później udowodnił, że światło składa się z fal elektromagnetycznych. Te odkrycia położyły podwaliny pod zrozumienie tego, jak różne długości fal łączą się, tworząc bogate spektrum kolorów, które postrzegamy.",
+					"W wyświetlaczach cyfrowych miliony maleńkich subpikseli RGB współpracują, aby stworzyć każdy obraz, który widzisz. Każdy piksel zawiera czerwone, zielone i niebieskie elementy, które mogą być indywidualnie kontrolowane, aby wytworzyć każdy kolor w gamie wyświetlacza—świadectwo mocy addytywnego mieszania światła.",
+					"Miękkie krawędzie i opadanie, które obserwujesz w tych kręgach, symuluje sposób, w jaki światło naturalnie zachowuje się w świecie fizycznym. Intensywność światła maleje wraz z odległością od źródła, tworząc stopniowe przejścia zamiast ostrych granic. To naturalne opadanie sprawia, że mieszanie światła jest tak wizualnie atrakcyjne i realistyczne.",
+					"Kontynuuj przewijanie, aby zbadać, jak te fundamentalne zasady światła i koloru tworzą niekończący się taniec odcieni, gdzie nauka spotyka się ze sztuką w symfonii promieniowania elektromagnetycznego, które nasze oczy interpretują jako piękne zjawisko, które nazywamy kolorem."
+				]
+			}
+		};
+
 		class RGBLightMixer {
 			constructor() {
-				this.canvas = document.getElementById('lightCanvas');
-				this.ctx = this.canvas.getContext('2d');
-				this.gyroStatus = document.getElementById('gyroStatus');
+				this.circles = {
+					red: document.getElementById('redCircle'),
+					green: document.getElementById('greenCircle'),
+					blue: document.getElementById('blueCircle')
+				};
 
-				this.circles = [
-					{
-						baseX: 0.3,
-						baseY: 0.4,
-						color: [255, 0, 0], // Red
-						offsetX: 0,
-						offsetY: 0
-					},
-					{
-						baseX: 0.7,
-						baseY: 0.4,
-						color: [0, 255, 0], // Green
-						offsetX: 0,
-						offsetY: 0
-					},
-					{
-						baseX: 0.5,
-						baseY: 0.7,
-						color: [0, 0, 255], // Blue
-						offsetX: 0,
-						offsetY: 0
-					}
-				];
+				this.gyroModal = document.getElementById('gyroModal');
+				this.gyroButton = document.getElementById('gyroButton');
+				this.gyroCancel = document.getElementById('gyroCancel');
 
-				this.gyroSupported = false;
-				this.lastGyroTime = 0;
+				this.gyroEnabled = false;
+				this.currentLanguage = this.detectLanguage();
+				this.motionReduced = false;
+
+				// Load saved preferences
+				this.loadPreferences();
+
+				// Random movement directions for each circle
+				this.circleDirections = {
+					red: { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 },
+					green: { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 },
+					blue: { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 }
+				};
 
 				this.init();
 			}
 
-			init() {
-				this.setupCanvas();
-				this.setupGyroscope();
-				this.animate();
-
-				window.addEventListener('resize', () => this.setupCanvas());
+			detectLanguage() {
+				const userLang = navigator.language || navigator.userLanguage;
+				return userLang.startsWith('pl') ? 'pl' : 'en';
 			}
 
-			setupCanvas() {
-				this.canvas.width = window.innerWidth;
-				this.canvas.height = window.innerHeight;
-
-				this.width = window.innerWidth;
-				this.height = window.innerHeight;
-				this.radius = Math.min(this.width, this.height) * 0.25;
-			}
-
-			setupGyroscope() {
-				// Check for gyroscope support
-				if ('DeviceOrientationEvent' in window) {
-					// Request permission for iOS 13+
-					if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-						DeviceOrientationEvent.requestPermission()
-							.then(permissionState => {
-								if (permissionState === 'granted') {
-									this.enableGyroscope();
-								} else {
-									this.gyroStatus.textContent = 'Gyroscope: Permission denied';
-									this.fallbackToMouse();
-								}
-							})
-							.catch(() => {
-								this.gyroStatus.textContent = 'Gyroscope: Permission error';
-								this.fallbackToMouse();
-							});
-					} else {
-						// Non-iOS or older iOS
-						this.enableGyroscope();
+			loadPreferences() {
+				try {
+					// Load gyroscope preference
+					const gyroPermission = localStorage.getItem('gyroPermission');
+					if (gyroPermission === 'granted') {
+						this.tryAutoEnableGyro();
+					} else if (gyroPermission === 'denied') {
+						this.hideGyroPrompt();
 					}
-				} else {
-					this.gyroStatus.textContent = 'Gyroscope: Not supported';
-					this.fallbackToMouse();
+
+					// Load language preference
+					const savedLang = localStorage.getItem('preferredLanguage');
+					if (savedLang) {
+						this.currentLanguage = savedLang;
+					}
+
+					// Load motion preference
+					this.motionReduced = localStorage.getItem('motionReduced') === 'true';
+				} catch (e) {
+					console.log('LocalStorage not available');
 				}
 			}
 
-			enableGyroscope() {
-				this.gyroSupported = true;
-
-				window.addEventListener('deviceorientation', (event) => {
-					this.lastGyroTime = Date.now();
-
-					const beta = event.beta || 0;   // X-axis rotation (-180 to 180)
-					const gamma = event.gamma || 0; // Y-axis rotation (-90 to 90)
-
-					// Convert to offset values (scaled down for subtle movement)
-					const offsetScale = 0.002;
-
-					this.circles.forEach((circle, index) => {
-						// Each circle reacts slightly differently
-						const multiplier = (index + 1) * 0.7;
-						circle.offsetX = gamma * offsetScale * multiplier;
-						circle.offsetY = beta * offsetScale * multiplier;
-					});
-
-					this.gyroStatus.textContent = `Gyroscope: Active (β:${beta.toFixed(1)}° γ:${gamma.toFixed(1)}°)`;
-				});
-
-				// Check if gyroscope data is actually coming through
-				setTimeout(() => {
-					if (Date.now() - this.lastGyroTime > 2000) {
-						this.gyroStatus.textContent = 'Gyroscope: No data, using mouse';
-						this.fallbackToMouse();
-					}
-				}, 3000);
+			savePreferences() {
+				try {
+					localStorage.setItem('preferredLanguage', this.currentLanguage);
+					localStorage.setItem('motionReduced', this.motionReduced);
+				} catch (e) {
+					console.log('Could not save preferences');
+				}
 			}
 
-			fallbackToMouse() {
+			async tryAutoEnableGyro() {
+				console.log('Trying to auto-enable gyroscope...');
+				if ('DeviceOrientationEvent' in window) {
+					try {
+						if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+							// iOS - still need to request permission but hide UI if already granted
+							this.hideGyroPrompt();
+							console.log('iOS device detected, showing permission prompt');
+						} else {
+							// Android or older iOS - try to enable directly
+							this.enableGyroscope();
+							this.hideGyroPrompt();
+							console.log('Gyroscope auto-enabled');
+						}
+					} catch (error) {
+						console.log('Auto-enable failed:', error);
+					}
+				}
+			}
+
+			hideGyroPrompt() {
+				this.gyroModal.style.display = 'none';
+			}
+
+			setLanguage() {
+				const lang = content[this.currentLanguage];
+
+				document.getElementById('mainHeading').textContent = lang.heading;
+				this.gyroButton.textContent = lang.button;
+				this.gyroCancel.textContent = lang.cancel;
+
+				// Populate text content from array
+				const textContainer = document.getElementById('textContent');
+				textContainer.innerHTML = lang.paragraphs.map(para => `<p class="paragraph">${para}</p>`).join('');
+
+				// Update control buttons
+				document.getElementById('langToggle').textContent = this.currentLanguage.toUpperCase();
+				document.getElementById('motionToggle').classList.toggle('active', !this.motionReduced);
+			}
+
+			setupControls() {
+				// Language toggle
+				document.getElementById('langToggle').addEventListener('click', () => {
+					this.currentLanguage = this.currentLanguage === 'en' ? 'pl' : 'en';
+					this.setLanguage();
+					this.savePreferences();
+				});
+
+				// Motion toggle
+				document.getElementById('motionToggle').addEventListener('click', () => {
+					this.motionReduced = !this.motionReduced;
+					document.body.classList.toggle('reduced-motion', this.motionReduced);
+					document.getElementById('motionToggle').classList.toggle('active', !this.motionReduced);
+					this.savePreferences();
+				});
+
+				// Apply saved states
+				if (this.motionReduced) {
+					document.body.classList.add('reduced-motion');
+				}
+			}
+
+			init() {
+				this.setLanguage();
+				this.setupControls();
+				this.setupMouseControls();
+				this.setupGyroButton();
+				this.startAnimation();
+			}
+
+			setupMouseControls() {
 				let mouseX = 0.5;
 				let mouseY = 0.5;
 
 				document.addEventListener('mousemove', (event) => {
+					if (this.motionReduced) return;
+
 					mouseX = event.clientX / window.innerWidth;
 					mouseY = event.clientY / window.innerHeight;
-
-					const offsetScale = 0.05;
-
-					this.circles.forEach((circle, index) => {
-						const multiplier = (index + 1) * 0.3;
-						circle.offsetX = (mouseX - 0.5) * offsetScale * multiplier;
-						circle.offsetY = (mouseY - 0.5) * offsetScale * multiplier;
-					});
+					this.updateCirclePositions(mouseX, mouseY);
 				});
 
-				// Touch support for mobile
 				document.addEventListener('touchmove', (event) => {
+					if (this.motionReduced) return;
+
 					if (event.touches.length > 0) {
 						const touch = event.touches[0];
 						mouseX = touch.clientX / window.innerWidth;
 						mouseY = touch.clientY / window.innerHeight;
-
-						const offsetScale = 0.05;
-
-						this.circles.forEach((circle, index) => {
-							const multiplier = (index + 1) * 0.3;
-							circle.offsetX = (mouseX - 0.5) * offsetScale * multiplier;
-							circle.offsetY = (mouseY - 0.5) * offsetScale * multiplier;
-						});
+						this.updateCirclePositions(mouseX, mouseY);
 					}
+					event.preventDefault();
+				}, { passive: false });
+			}
+
+			setupGyroButton() {
+				this.gyroButton.addEventListener('click', () => {
+					this.requestGyroPermission();
+				});
+
+				this.gyroCancel.addEventListener('click', () => {
+					try {
+						localStorage.setItem('gyroPermission', 'denied');
+					} catch (e) {
+						console.log('Could not save gyro preference');
+					}
+					this.hideGyroPrompt();
+					console.log('Gyroscope permission denied by user');
 				});
 			}
 
-			createRadialGradient(x, y, color) {
-				const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, this.radius);
-				gradient.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1)`);
-				gradient.addColorStop(0.7, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.5)`);
-				gradient.addColorStop(1, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
-				return gradient;
+			async requestGyroPermission() {
+				if (!('DeviceOrientationEvent' in window)) {
+					this.hideGyroPrompt();
+					return;
+				}
+
+				try {
+					if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+						const permission = await DeviceOrientationEvent.requestPermission();
+
+						if (permission === 'granted') {
+							try {
+								localStorage.setItem('gyroPermission', 'granted');
+							} catch (e) {
+								console.log('Could not save gyro permission');
+							}
+							this.enableGyroscope();
+							this.hideGyroPrompt();
+							console.log('Gyroscope permission granted');
+						} else {
+							try {
+								localStorage.setItem('gyroPermission', 'denied');
+							} catch (e) {
+								console.log('Could not save gyro denial');
+							}
+							console.log('Gyroscope permission denied');
+						}
+					} else {
+						try {
+							localStorage.setItem('gyroPermission', 'granted');
+						} catch (e) {
+							console.log('Could not save gyro permission');
+						}
+						this.enableGyroscope();
+						this.hideGyroPrompt();
+						console.log('Gyroscope enabled (non-iOS)');
+					}
+				} catch (error) {
+					console.log('Gyroscope error:', error);
+				}
 			}
 
-			drawCircle(circle) {
-				const x = (circle.baseX + circle.offsetX) * this.width;
-				const y = (circle.baseY + circle.offsetY) * this.height;
+			enableGyroscope() {
+				this.gyroEnabled = true;
 
-				this.ctx.save();
-				this.ctx.globalCompositeOperation = 'screen'; // Better blending for web
-				this.ctx.fillStyle = this.createRadialGradient(x, y, circle.color);
-				this.ctx.beginPath();
-				this.ctx.arc(x, y, this.radius, 0, Math.PI * 2);
-				this.ctx.fill();
-				this.ctx.restore();
+				window.addEventListener('deviceorientation', (event) => {
+					if (this.motionReduced) return;
+
+					const beta = event.beta || 0;
+					const gamma = event.gamma || 0;
+
+					const normalizedX = (gamma + 90) / 180;
+					const normalizedY = (beta + 180) / 360;
+
+					this.updateCirclePositions(normalizedX, normalizedY);
+				});
 			}
 
-			animate() {
-				// Clear canvas with white background
-				this.ctx.globalCompositeOperation = 'source-over';
-				this.ctx.fillStyle = 'white';
-				this.ctx.fillRect(0, 0, this.width, this.height);
+			updateCirclePositions(inputX, inputY) {
+				if (this.motionReduced) return;
 
-				// Draw circles with additive blending
-				this.circles.forEach(circle => this.drawCircle(circle));
+				const offsetScale = 200; // Increased from 150 for larger shifts
 
-				requestAnimationFrame(() => this.animate());
+				// Each circle moves in different random directions
+				const redOffsetX = (inputX - 0.5) * offsetScale * this.circleDirections.red.x;
+				const redOffsetY = (inputY - 0.5) * offsetScale * this.circleDirections.red.y;
+
+				const greenOffsetX = (inputX - 0.5) * offsetScale * this.circleDirections.green.x;
+				const greenOffsetY = (inputY - 0.5) * offsetScale * this.circleDirections.green.y;
+
+				const blueOffsetX = (inputX - 0.5) * offsetScale * this.circleDirections.blue.x;
+				const blueOffsetY = (inputY - 0.5) * offsetScale * this.circleDirections.blue.y;
+
+				this.circles.red.style.transform = `translate(${redOffsetX}px, ${redOffsetY}px)`;
+				this.circles.green.style.transform = `translate(${greenOffsetX}px, ${greenOffsetY}px)`;
+				this.circles.blue.style.transform = `translate(${blueOffsetX}px, ${blueOffsetY}px) translateX(-50%)`;
+			}
+
+			startAnimation() {
+				let time = 0;
+
+				const animate = () => {
+					if (!this.gyroEnabled && !this.motionReduced) {
+						time += 0.01;
+						const autoX = 0.5 + Math.sin(time) * 0.1;
+						const autoY = 0.5 + Math.cos(time * 0.7) * 0.1;
+					}
+
+					requestAnimationFrame(animate);
+				};
+
+				animate();
 			}
 		}
 
-		// Initialize when DOM is loaded
 		document.addEventListener('DOMContentLoaded', () => {
 			new RGBLightMixer();
-
-			// Hide gyro status after a few seconds if everything is working
-			setTimeout(() => {
-				const status = document.getElementById('gyroStatus');
-				if (status.textContent.includes('Active')) {
-					status.style.opacity = '0.3';
-				}
-			}, 5000);
 		});
 	</script>
 </body>
