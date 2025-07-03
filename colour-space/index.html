@@ -79,9 +79,10 @@
 		.content {
 			position: relative;
 			z-index: 2;
-			max-width: 800px;
 			min-height: 100vh;
 			padding: 6rem;
+			max-width: 800px;
+			margin: 0 auto;
 			color: white;
 			mix-blend-mode: difference;
 			overflow-y: auto;
@@ -103,7 +104,7 @@
 			font-style: normal;
 			font-size: clamp(1rem, 3vw, 1.5rem);
 			line-height: 1.6;
-			margin: 0 auto;
+
 			text-align: left;
 		}
 
@@ -247,6 +248,7 @@
 				heading: "COLOUR SPACE",
 				button: "Enable Gyroscope",
 				cancel: "Cancel",
+				motion: "MOTION",
 				paragraphs: [
 					"Light mixing is a fundamental principle in physics and visual arts, where different colored lights combine to create new hues through additive color synthesis. Unlike pigment mixing, which is subtractive, light mixing follows the RGB (Red, Green, Blue) color model where colors become brighter as they overlap.",
 					"When pure red, green, and blue lights intersect, they create secondary colors: red and green produce yellow, blue and green create cyan, and red and blue form magenta. Where all three primary lights converge, white light emerges—the complete visible spectrum unified.",
@@ -262,6 +264,7 @@
 				heading: "PRZESTRZEŃ BARW",
 				button: "Włącz żyroskop",
 				cancel: "Anuluj",
+				motion: "RUCH",
 				paragraphs: [
 					"Mieszanie światła jest fundamentalną zasadą fizyki i sztuk wizualnych, gdzie różnokolorowe światła łączą się, tworząc nowe odcienie poprzez addytywną syntezę kolorów. W przeciwieństwie do mieszania pigmentów, które jest subtraktywne, mieszanie światła opiera się na modelu RGB (czerwony, zielony, niebieski), gdzie kolory stają się jaśniejsze podczas nakładania.",
 					"Gdy czyste czerwone, zielone i niebieskie światła przecinają się, tworzą kolory wtórne: czerwony i zielony dają żółty, niebieski i zielony tworzą cyjan, a czerwony i niebieski formują magentę. Tam, gdzie wszystkie trzy podstawowe światła zbiegają się, powstaje białe światło—kompletne widmo widzialne zjednoczone.",
@@ -437,6 +440,7 @@
 
 				// Update control buttons
 				document.getElementById('langToggle').textContent = this.currentLanguage.toUpperCase();
+				document.getElementById('motionToggle').textContent = lang.motion;
 				document.getElementById('motionToggle').classList.toggle('active', !this.motionReduced);
 			}
 
@@ -472,7 +476,7 @@
 
 				// Reposition circles on window resize
 				window.addEventListener('resize', () => {
-					this.positionCircles();
+					//this.positionCircles();
 				});
 			}
 
